@@ -8,12 +8,10 @@ type typ =
 	| TSum of typ * typ
 	| TPtr of typ
 	| TStruct of type_signature
-	| TRec of type_signature
 
 type var = string
 type function_name = string
 type argument = var * typ
-
 
 type expr = 
 	EVar of var 
