@@ -1,4 +1,4 @@
-type int_list = (int *  ptr int_list) + ()
+type int_list = (int *  ptr int_list) + unit
 in
 append(list : int_list, value : int) : int_list = vars in
 	switch list as
