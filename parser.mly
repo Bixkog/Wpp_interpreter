@@ -4,7 +4,7 @@
 %token DOT BAR COMMA COL SEMICOL
 %token IN RETURN
 %token IF THEN ELSE
-%token MATCH WITH SWITCH CASE
+%token MATCH WITH SWITCH
 %token SKIP WHILE DO
 %token STAR
 %token SUM NEG
@@ -18,27 +18,30 @@
 %token NEW
 %token EOF
 
-%nonassoc DOT ELSE COL SEMICOL
+%nonassoc DOT ELSE COL DO 
+%right OUTL OUTR INL INR PTR
 %left NEG
 %left STAR
 %left SUM
+%right SEMICOL
+%right IN
 
 %start <Syntax.program> program
 
 %%
     
 program:
-    | tds = type_declaration*; IN; 
+    | tds = type_declaration*; IN;
         fds = function_declaration*; IN; 
         vds = variables_declarations; IN;
-        c = command; EOF
-        {Syntax.program (td, fd, vd, c)}
+        c = command; EOF 
+        {(tds, fds, vds, c)}
 
 type_declaration:
     | TYPE; type_signature = ID; EQUALS; type_definition = typ {(type_signature, type_definition)}
 
 function_declaration:
-    | function_id = ID; LPAR; args = separated_list(COMMA, typed_argument); RPAR; COLON; return_type = typ; EQUALS; 
+    | function_id = ID; LPAR; args = separated_list(COMMA, typed_argument); RPAR; COL; return_type = typ; EQUALS; 
         function_variables = variables_declarations; IN;
         c = command; SEMICOL;
         RETURN; e = expr
@@ -61,6 +64,9 @@ command:
     | VAR; var_id = ID; ASSIGN; NEW; e = expr; IN; c = command {Syntax.CPtrVar (var_id, e, c)}
     | var_id = ID; ASSIGN; function_id = ID; LPAR; args = separated_list(COMMA, expr); RPAR 
         {Syntax.CCall (var_id, function_id, args)}
+    | SWITCH; e = expr; INL; id_left = ID; COL; c_left = command; 
+                        INR; id_right = ID; COL; c_right = command {Syntax.CSwitch (e, (id_left, c_left), (id_right, c_right))}
+    | ABORT; {Syntax.CAbort}
 
 abstr:
     | var_id = ID; DOT; e = expr {(var_id, e)}
@@ -75,8 +81,10 @@ expr:
     | MATCH; e = expr; WITH; BAR; INL; a_left = abstr; BAR; INR; a_right = abstr {Syntax.EMatch (e, a_left, a_right)}
     | STAR; e = expr {Syntax.EDeref (e)}
     | e1 = expr; SUM; e2 = expr {Syntax.ESum(e1, e2)}
-    | e1 = expr; STAR; e2 = expr {Syntax.EProd(e1, e2)}
+    | e1 = expr; STAR; e2 = expr {Syntax.EMult(e1, e2)}
     | NEG; e = expr {Syntax.ENeg (e)}
+    | LPAR; e = expr; RPAR {e}
+    | ABORT {EAbort}
 
 typ:
     | INT {Syntax.TInt}
@@ -88,4 +96,4 @@ typ:
     | type_id = ID {Syntax.TStruct (type_id)}
 
 typed_argument:
-    | arg_id = ID; COLON; t = typ {(arg_id, t)}
+    | arg_id = ID; COL; t = typ {(arg_id, t)}

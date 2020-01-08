@@ -16,7 +16,7 @@ type argument = var * typ
 type expr = 
 	EVar of var 
 	| EInt of int
-	| EUnit | EProd of expr * expr
+	| EUnit | EPar of expr * expr
 	| EProjL of expr | EProjR of expr
 	| EInjL of expr | EInjR of expr
 	| EMatch of expr * (var * expr) * (var * expr)
@@ -24,6 +24,7 @@ type expr =
 	| ESum of expr * expr
 	| EMult of expr * expr
 	| ENeg of expr
+	| EAbort
 
 type command = 
 	CSkip 
@@ -35,6 +36,8 @@ type command =
 	| CVar of var * expr * command
 	| CPtrVar of var * expr * command 
 	| CCall of var * function_name * (expr list)
+	| CSwitch of expr * (var * command) * (var * command)
+	| CAbort
 
 type vars_declarations = (var * expr) list
 type function_declaration = function_name * (argument list) * typ * vars_declarations * command * expr

@@ -1,7 +1,7 @@
 type int_list = (int *  ptr int_list) + unit
 in
 append(list : int_list, value : int) : int_list = vars in
-	switch list as
+	switch list
 	inl x: 
 		var head = outl x in
 		var tail = *(outr x) in

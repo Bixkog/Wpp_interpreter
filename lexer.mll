@@ -26,7 +26,6 @@ rule read =
     | "match" {MATCH}
     | "with" {WITH}
     | "switch" {SWITCH}
-    | "case" {CASE}
     | "skip" {SKIP}
     | "while" {WHILE}
     | "do" {DO}
