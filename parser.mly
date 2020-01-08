@@ -18,13 +18,12 @@
 %token NEW
 %token EOF
 
-%nonassoc DOT ELSE COL DO 
+%nonassoc DOT ELSE COL DO IN
 %right OUTL OUTR INL INR PTR
 %left NEG
 %left STAR
 %left SUM
 %right SEMICOL
-%right IN
 
 %start <Syntax.program> program
 
@@ -94,6 +93,7 @@ typ:
     | t1 = typ; SUM; t2 = typ {Syntax.TSum (t1, t2)}
     | PTR; t = typ {Syntax.TPtr (t)}
     | type_id = ID {Syntax.TStruct (type_id)}
+    | LPAR; t = typ; RPAR {t}
 
 typed_argument:
     | arg_id = ID; COL; t = typ {(arg_id, t)}
