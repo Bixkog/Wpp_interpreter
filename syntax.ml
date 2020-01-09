@@ -39,7 +39,11 @@ type command =
 	| CSwitch of expr * (var * command) * (var * command)
 	| CAbort
 
-type vars_declarations = (var * expr) list
+type var_declaration = 
+	Var of var * expr
+	| PtrVar of var * expr
+
+type vars_declarations = var_declaration list
 type function_declaration = function_name * (argument list) * typ * vars_declarations * command * expr
 type type_declaration = type_signature * typ
 

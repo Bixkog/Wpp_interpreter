@@ -18,7 +18,7 @@
 %token NEW
 %token EOF
 
-%nonassoc DOT ELSE COL DO IN
+%nonassoc DOT ELSE COL DO IN 
 %right OUTL OUTR INL INR PTR
 %left NEG
 %left STAR
@@ -42,7 +42,7 @@ type_declaration:
 function_declaration:
     | function_id = ID; LPAR; args = separated_list(COMMA, typed_argument); RPAR; COL; return_type = typ; EQUALS; 
         function_variables = variables_declarations; IN;
-        c = command; SEMICOL;
+        c = command; IN;
         RETURN; e = expr
         {(function_id, args, return_type, function_variables, c, e)}
 
@@ -50,7 +50,8 @@ variables_declarations:
     | VARS; vds = separated_list(COMMA, variable_declaration) {vds}
 
 variable_declaration:
-    | var_id = ID; ASSIGN; e = expr {(var_id, e)}
+    | var_id = ID; ASSIGN; e = expr {Syntax.Var(var_id, e)}
+    | var_id = ID; ASSIGN; NEW; e = expr {Syntax.PtrVar(var_id, e)}
 
 command:
     | SKIP {Syntax.CSkip}

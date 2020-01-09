@@ -1,1 +1,14 @@
-IN IN vars IN skip
+type int_list = (int *  ptr int_list) + unit in
+append(list : int_list, value : int) : int_list = vars in
+	switch list
+	inl x: 
+		var head := outl x in
+		var tail := *(outr x) in
+		tail := append(tail, value);
+		var tail_p := new tail in
+		list := inl <head, tail_p>
+	inr x:
+		var empty := new inr <> in
+		list := inl <value, empty>
+	in return list
+in vars a := <> in skip

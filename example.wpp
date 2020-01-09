@@ -3,21 +3,22 @@ in
 append(list : int_list, value : int) : int_list = vars in
 	switch list
 	inl x: 
-		var head = outl x in
-		var tail = *(outr x) in
+		var head := outl x in
+		var tail := *(outr x) in
 		tail := append(tail, value);
-		var tail_p = new tail in
+		var tail_p := new tail in
 		list := inl <head, tail_p>
 	inr x:
 		var empty := new inr <> in
 		list := inl <value, empty>
-	; return list
+	in return list
 in
-vars list = new <>
+vars list := new <>
 in 
-var empty := new inr<> in
+var empty := new inr <> in
 var list1 := new inl <1, empty> in
-var list2_v := append(*list1, 2) in
+var list2_v := <> in
+list2_v := append(*list1, 2);
 var list2 := new list2_v in
 list := list2
 

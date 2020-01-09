@@ -2,6 +2,7 @@ open Core
 open Lexer
 open Lexing
 open In_channel
+open Pretty
 
 let print_position outx lexbuf =
   let pos = lexbuf.lex_curr_p in
@@ -18,5 +19,6 @@ let parse lexbuf =
 let _ = 
 	let ic = In_channel.create Sys.argv.(1) in
 	let lexbuf = Lexing.from_channel ic in
-	parse lexbuf
+	let program = parse lexbuf in
+	print_string (pretty_program program)
 
