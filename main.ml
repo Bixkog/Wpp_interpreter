@@ -20,5 +20,6 @@ let _ =
 	let ic = In_channel.create Sys.argv.(1) in
 	let lexbuf = Lexing.from_channel ic in
 	let program = parse lexbuf in
-	print_string (pretty_program program)
-
+	print_string (pretty_program program);
+	let res = Typechecker.typecheck program in
+	res

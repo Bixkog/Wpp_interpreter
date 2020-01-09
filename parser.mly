@@ -32,7 +32,7 @@
 program:
     | tds = type_declaration*; IN;
         fds = function_declaration*; IN; 
-        vds = variables_declarations; IN;
+        vds = variable_declarations; IN;
         c = command; EOF 
         {(tds, fds, vds, c)}
 
@@ -41,12 +41,12 @@ type_declaration:
 
 function_declaration:
     | function_id = ID; LPAR; args = separated_list(COMMA, typed_argument); RPAR; COL; return_type = typ; EQUALS; 
-        function_variables = variables_declarations; IN;
+        function_variables = variable_declarations; IN;
         c = command; IN;
         RETURN; e = expr
         {(function_id, args, return_type, function_variables, c, e)}
 
-variables_declarations:
+variable_declarations:
     | VARS; vds = separated_list(COMMA, variable_declaration) {vds}
 
 variable_declaration:

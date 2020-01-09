@@ -43,25 +43,26 @@ let rec pretty_command c = match c with
 										"inr " ^ r ^ ": (" ^ (pretty_command cr) ^ ")"
 	| CAbort -> "c_abort"
 		
-let pretty_vars_declarations vars_decl = 
-	let pretty_var_declaration var_decl = match var_decl with
+let pretty_var_declaration var_decl = match var_decl with
 		Var (v, e) -> v ^ " := " ^ (pretty_expr e)
 		| PtrVar (v, e) -> v ^ " := new " ^ (pretty_expr e)
-	in
+
+let pretty_vars_declarations vars_decl = 
 	"vars " ^ (String.concat ", " (List.map pretty_var_declaration vars_decl))
 
-let pretty_functions_declarations fun_decl = 
-	let pretty_function_declaration (f, args, typ, vars, c, e) =
+let pretty_function_declaration (f, args, typ, vars, c, e) =
 		f ^ "(" ^ 
 		(String.concat ", " (List.map (fun (v, t) -> v ^ " : " ^ (pretty_typ t)) args)) ^ ") : " ^
 		(pretty_typ typ) ^ " = " ^
 		(pretty_vars_declarations vars) ^ " in " ^ 
 		(pretty_command c) ^ "; return " ^ (pretty_expr e)
-	in
+
+let pretty_functions_declarations fun_decl = 
 	String.concat "\n" (List.map pretty_function_declaration fun_decl)
 
+let pretty_type_declaration (t_id, t) = "type " ^ t_id ^ " = " ^ (pretty_typ t) 
+
 let pretty_type_declarations type_decl = 
-	let pretty_type_declaration (t_id, t) = "type " ^ t_id ^ " = " ^ (pretty_typ t) in
 	String.concat "\n" (List.map pretty_type_declaration type_decl) 
 
 let pretty_program (type_decl, fun_decl, vars_decl, c) = 
