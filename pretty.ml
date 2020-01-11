@@ -9,6 +9,7 @@ let rec pretty_typ t = match t with
 	| TSum (t1, t2) -> "(" ^ (pretty_typ t1) ^ " + " ^ (pretty_typ t2) ^ ")"
 	| TPtr t -> "Ptr " ^ (pretty_typ t)
 	| TStruct s -> s
+	| TUnknown -> "_"
 
 let rec pretty_expr e = match e with
 	| EVar x -> x

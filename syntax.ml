@@ -8,6 +8,7 @@ type typ =
 	| TSum of typ * typ
 	| TPtr of typ
 	| TStruct of type_signature
+	| TUnknown (* used as the other type of sum in deduction*)
 
 type var = string
 type function_name = string
