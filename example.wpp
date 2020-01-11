@@ -13,11 +13,11 @@ append(list : int_list, value : int) : int_list = vars in
 		list := inl <value, empty>
 	in return list
 in
-vars list := new <>
+vars list := new inr <>
 in 
 var empty := new inr <> in
 var list1 := new inl <1, empty> in
-var list2_v := <> in
+var list2_v := inr <> in
 list2_v := append(*list1, 2);
 var list2 := new list2_v in
 list := list2
