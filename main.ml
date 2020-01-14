@@ -23,6 +23,7 @@ let _ =
 	(* print_string (pretty_program program); *)
 	Typechecker.typecheck program;
 	let (heap, var_env) = Evaluator.eval_program program in
+	print_endline "-----END-----";
 	print_endline "VARIABLES:";
 	List.iter (pretty_env var_env) print_endline;
 	print_endline "HEAP:";

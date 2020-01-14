@@ -16,6 +16,7 @@
 %token PTR
 %token VARS VAR TYPE
 %token NEW
+%token DEBUG_PRINT
 %token EOF
 
 %nonassoc DOT ELSE COL DO IN 
@@ -67,6 +68,7 @@ command:
     | SWITCH; e = expr; INL; id_left = ID; COL; c_left = command; 
                         INR; id_right = ID; COL; c_right = command {Syntax.CSwitch (e, (id_left, c_left), (id_right, c_right))}
     | ABORT; {Syntax.CAbort}
+    | DEBUG_PRINT; id = ID {Syntax.CDebugPrint(id)}
     | LPAR; c = command; RPAR {c}
 
 abstr:

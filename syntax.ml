@@ -38,6 +38,7 @@ type command =
 	| CPtrVar of var * expr * command 
 	| CCall of var * function_name * (expr list)
 	| CSwitch of expr * (var * command) * (var * command)
+	| CDebugPrint of string
 	| CAbort
 
 type var_declaration = 

@@ -51,6 +51,7 @@ rule read =
     | "var" {VAR}
     | "type" {TYPE}
     | "new" {NEW}
+    | "debug_print" {DEBUG_PRINT}
     | id {ID (Lexing.lexeme lexbuf)}
     | _ {failwith ("Unexpected char: " ^ Lexing.lexeme lexbuf)}
     | eof {EOF}

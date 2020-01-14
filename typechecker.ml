@@ -199,6 +199,7 @@ let check_command type_env function_env var_env c =
 	 				check var_env_right c_right
 	 			| t -> failwith ("Switch expression " ^ 
 	 				(pretty_expr e) ^ " is type " ^ (pretty_typ t) ^  " and not of type sum."))
+	 	| CDebugPrint _ -> ()
 	 	| CAbort -> ()
 	in
 	check var_env c

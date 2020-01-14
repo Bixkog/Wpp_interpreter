@@ -64,7 +64,7 @@ let rec eval_function_call fun_env heap f_id args_v =
 	let args_env = Env.of_seq (List.to_seq (List.combine args_ids args_v)) in
 	let (heap, var_env) = eval_vars heap args_env vars in
 	let (heap', var_env') = eval_command fun_env heap var_env c in
-	eval_expr heap var_env' e
+	(heap', eval_expr heap var_env' e)
 and eval_command fun_env heap var_env c = 
 	let rec eval heap var_env c = match c with
 	| CSkip -> (heap, var_env)
@@ -89,20 +89,28 @@ and eval_command fun_env heap var_env c =
 		let local_var_env = Env.add id (eval_expr heap var_env e) var_env in 
 		let (heap', var_env') = eval heap local_var_env c in
 		let fixed_var_env = Env.remove id var_env' in
-		(heap, fixed_var_env)
+		(heap', fixed_var_env)
 	| CPtrVar (id, e, c) -> let alloc_ptr, heap' = alloc (eval_expr heap var_env e) heap in
 		let local_var_env = Env.add id alloc_ptr var_env in
 		let (heap', var_env') = eval heap' local_var_env c in
 		let fixed_var_env = Env.remove id var_env' in
 		(heap', fixed_var_env)
 	| CCall (v_id, f_id, args) -> let args_v = List.map (eval_expr heap var_env) args in
-		let call_result = eval_function_call fun_env heap f_id args_v in
-		(heap, Env.add v_id call_result var_env)
+		let (heap', call_result) = eval_function_call fun_env heap f_id args_v in
+		(heap', Env.add v_id call_result var_env)
 	| CSwitch (e, (id_left, c_left), (id_right, c_right)) -> 
 		(match eval_expr heap var_env e with
 		| VInjL v -> eval heap (Env.add id_left v var_env) c_left
 		| VInjR v -> eval heap (Env.add id_right v var_env) c_right
 		| _ -> failwith ("Switch condition " ^ (pretty_expr e) ^ " doesn't evaluate to sum."))
+	| CDebugPrint s -> 
+		print_endline ("-----" ^ s ^ "-----");
+		print_endline "VARIABLES:";
+		List.iter print_endline (pretty_env var_env);
+		print_endline "HEAP:";
+		List.iter print_endline (pretty_heap heap);
+		(heap, var_env)
+
 	| CAbort -> failwith "Abort"
 	in 
 	eval heap var_env c

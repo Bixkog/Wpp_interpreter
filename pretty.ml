@@ -43,6 +43,7 @@ let rec pretty_command c = match c with
 	| CSwitch (e, (l, cl), (r, cr)) -> "(switch " ^ (pretty_expr e) ^ " as " ^
 										"inl " ^ l ^ ": (" ^ (pretty_command cl) ^ ") " ^  
 										"inr " ^ r ^ ": (" ^ (pretty_command cr) ^ ")"
+	| CDebugPrint _ -> ""
 	| CAbort -> "c_abort"
 		
 let pretty_var_declaration var_decl = match var_decl with
