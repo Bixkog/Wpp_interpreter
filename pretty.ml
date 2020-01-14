@@ -1,4 +1,5 @@
 open Syntax
+open Value 
 
 let rec pretty_typ t = match t with
 	| TInt -> "int"
@@ -71,4 +72,19 @@ let pretty_program (type_decl, fun_decl, vars_decl, c) =
 	pretty_functions_declarations fun_decl ^ " in " ^
 	pretty_vars_declarations vars_decl ^ " in " ^
 	pretty_command c
+
+let rec pretty_value v = match v with
+	| VInt n -> string_of_int n
+	| VPtr p -> "&" ^ (string_of_int p)
+	| VInjL v -> "inl (" ^ (pretty_value v) ^ ")"
+	| VInjR v -> "inr (" ^ (pretty_value v) ^ ")"
+	| VPar (v1, v2) -> "<" ^ (pretty_value v1) ^ ", " ^ (pretty_value v2) ^ ">"
+	| VUnit -> "<>"
+
+let pretty_heap heap =  List.rev (Heap.fold 
+	(fun k v l -> ((string_of_int k) ^ " = " ^ (pretty_value v)) :: l)
+	heap [])
+
+let pretty_env env = List.rev (Env.fold (fun k v l -> (k ^ " = " ^ (pretty_value v)) :: l) env [])
+
 

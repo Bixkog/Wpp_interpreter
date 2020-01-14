@@ -21,5 +21,9 @@ let _ =
 	let lexbuf = Lexing.from_channel ic in
 	let program = parse lexbuf in
 	(* print_string (pretty_program program); *)
-	let res = Typechecker.typecheck program in
-	res
+	Typechecker.typecheck program;
+	let (heap, var_env) = Evaluator.eval_program program in
+	print_endline "VARIABLES:";
+	List.iter (pretty_env var_env) print_endline;
+	print_endline "HEAP:";
+	List.iter (pretty_heap heap) print_endline 

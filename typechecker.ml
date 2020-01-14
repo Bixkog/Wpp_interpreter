@@ -2,15 +2,8 @@ open Syntax
 open Pretty
 open Map
 
-module TypeEnv = Map.Make(String);;
-module VarEnv = Map.Make(String);;
-module FunctionEnv = Map.Make(String);;
-
-let print_var_env var_env = 
-	print_endline (String.concat ", " (List.of_seq (Seq.map (fun (id, t) -> id ^" : " ^ (pretty_typ t)) (VarEnv.to_seq var_env))))
-
 (* 
-	checks if user defined type is correct. 
+	Checks, if user defined type is correct. 
 	That is, it uses only defined types, and user types are under ptr. 
 *)
 let check_user_type declared_types t = 
@@ -38,7 +31,7 @@ let check_type_declarations type_declarations =
 
 (* extracts top-level user type *)
 let rec extract_type type_env t = match t with
-	| TStruct id -> extract_type type_env (TypeEnv.find id type_env)
+	| TStruct id -> extract_type type_env (Env.find id type_env)
 	| t -> t
 
 (* Equality relation that takes user types and Unknown into account *)
@@ -63,7 +56,7 @@ let eq_type type_env t1 t2 =
 	in
 	aux t1 t2
 
-(* unifies two equal types (according to above relation) *)
+(* Unifies two equal types (according to above relation). Used in match expression to deduce return type. *)
 let rec unify_types a b = 
 	if b = TUnknown then a else
 	match a with 
@@ -88,7 +81,7 @@ let rec unify_types a b =
 let rec deduce_expr_type type_env var_env e = 
 	let extract = extract_type type_env in
 	let rec deduce e = match e with 
-		| EVar x -> (try VarEnv.find x var_env
+		| EVar x -> (try Env.find x var_env
 					with Not_found -> failwith ("Variable " ^ x ^ " is not defined."))
 		| EInt _ -> TInt
 		| EUnit -> TUnit
@@ -104,8 +97,8 @@ let rec deduce_expr_type type_env var_env e =
 		| EMatch (e, (id_left, e_left), (id_right, e_right)) ->
 			(match deduce e with
 				| TSum (t1, t2) -> 
-					let left_vars = VarEnv.add id_left t1 var_env in
-					let right_vars = VarEnv.add id_right t2 var_env in
+					let left_vars = Env.add id_left t1 var_env in
+					let right_vars = Env.add id_right t2 var_env in
 					let t_left = deduce_expr_type type_env left_vars e_left in
 					let t_right = deduce_expr_type type_env right_vars e_right in
 					if eq_type type_env t_left t_right then
@@ -134,14 +127,13 @@ let rec deduce_expr_type type_env var_env e =
 let rec deduce_vars_types type_env var_env vars = match vars with 
 	| [] -> var_env
 	| Var (id, e) :: tl -> let var_type = deduce_expr_type type_env var_env e in
-		deduce_vars_types type_env (VarEnv.add id var_type var_env) tl
+		deduce_vars_types type_env (Env.add id var_type var_env) tl
 	| PtrVar (id, e) :: tl -> let var_type = TPtr (deduce_expr_type type_env var_env e) in
-		deduce_vars_types type_env (VarEnv.add id var_type var_env) tl
+		deduce_vars_types type_env (Env.add id var_type var_env) tl
 
 (* Checks if command is well formed. *)
 let check_command type_env function_env var_env c =
 	let rec check var_env c = 
-	print_var_env var_env;
 	match c with 
 	 	| CSkip -> () 
 	 	| CSeq (c1, c2) -> check var_env c1; check var_env c2;
@@ -154,8 +146,8 @@ let check_command type_env function_env var_env c =
 	 		then check var_env c
 	 		else failwith ("while condition" ^ (pretty_expr e) ^ " is not an int.")
 	 	| CAssign (id, e) -> 
-	 		if VarEnv.mem id var_env then
-	 			let var_type = extract_type type_env (VarEnv.find id var_env) in
+	 		if Env.mem id var_env then
+	 			let var_type = extract_type type_env (Env.find id var_env) in
 	 			let expr_type = extract_type type_env (deduce_expr_type type_env var_env e) in
 	 			(if not (eq_type type_env var_type expr_type) then 
 	 				failwith ("Type of expression and variable do not match at " ^ (pretty_command c) ^
@@ -163,8 +155,8 @@ let check_command type_env function_env var_env c =
 	 				" expression type: " ^ (pretty_typ expr_type)))
 	 		else failwith ("Variable " ^ id ^ " is not defined at " ^ (pretty_command c))
 	 	| CPtrAssign(id, e) -> 
-	 		if VarEnv.mem id var_env then
-	 			let var_type = extract_type type_env (VarEnv.find id var_env) in
+	 		if Env.mem id var_env then
+	 			let var_type = extract_type type_env (Env.find id var_env) in
 	 			let expr_type = extract_type type_env (deduce_expr_type type_env var_env e) in
 	 			(if not (eq_type type_env var_type (TPtr expr_type)) then 
 	 				failwith ("Type of expression and variable do not match at " ^ (pretty_command c) ^
@@ -172,20 +164,20 @@ let check_command type_env function_env var_env c =
 	 				" expression type: " ^ (pretty_typ expr_type)))
 	 		else failwith ("Variable " ^ id ^ " is not defined at " ^ (pretty_command c))
 	 	| CVar (id, e, c) -> let expr_type = deduce_expr_type type_env var_env e in
-	 		let extended_var_env = VarEnv.add id expr_type var_env in
+	 		let extended_var_env = Env.add id expr_type var_env in
 	 		check extended_var_env c
 	 	| CPtrVar (id, e, c) -> let expr_type = TPtr (deduce_expr_type type_env var_env e) in
-	 		let extended_var_env = VarEnv.add id expr_type var_env in
+	 		let extended_var_env = Env.add id expr_type var_env in
 	 		check extended_var_env c
 	 	| CCall (var_id, fun_id, args) -> 
-	 		if not (VarEnv.mem var_id var_env) then 
+	 		if not (Env.mem var_id var_env) then 
 	 			failwith ("Variable " ^ var_id ^ " is not defined at " ^ (pretty_command c))
 	 		else
-	 		if not (FunctionEnv.mem fun_id function_env) then 
+	 		if not (Env.mem fun_id function_env) then 
 	 			failwith ("Function " ^ fun_id ^ " is not defined at " ^ (pretty_command c))
 	 		else
-	 		let var_type = VarEnv.find var_id var_env in
-	 		let fun_type = FunctionEnv.find fun_id function_env in
+	 		let var_type = Env.find var_id var_env in
+	 		let fun_type = Env.find fun_id function_env in
 	 		let return_type = snd fun_type in
 	 		if not (eq_type type_env return_type var_type) then 
 	 			failwith ("Function return type and variable type do not match at " ^ (pretty_command c) ^
@@ -201,8 +193,8 @@ let check_command type_env function_env var_env c =
 	 	| CSwitch (e, (id_left, c_left), (id_right, c_right)) ->
 	 		(match extract_type type_env (deduce_expr_type type_env var_env e) with
 	 			| TSum (t1, t2) -> 
-	 				let var_env_left = VarEnv.add id_left t1 var_env in
-	 				let var_env_right = VarEnv.add id_right t2 var_env in
+	 				let var_env_left = Env.add id_left t1 var_env in
+	 				let var_env_right = Env.add id_right t2 var_env in
 	 				check var_env_left c_left;
 	 				check var_env_right c_right
 	 			| t -> failwith ("Switch expression " ^ 
@@ -217,13 +209,11 @@ let check_command type_env function_env var_env c =
 	Their variables have types, commands are well formed and return expresion type is correct/
 *)
 let check_function_declarations type_env function_declarations =
-	let function_env = FunctionEnv.of_seq 
+	let function_env = Env.of_seq 
 		 (List.to_seq (List.map (fun (id, args, r_type, _, _, _) -> (id, (args, r_type))) function_declarations)) in
 	let check_function_declaration (id, args, r_type, vars, c, e) = 
-		let arg_types = VarEnv.of_seq (List.to_seq args) in
-		print_var_env arg_types;
+		let arg_types = Env.of_seq (List.to_seq args) in
 		let var_env = deduce_vars_types type_env arg_types vars in
-		print_var_env var_env;
 		check_command type_env function_env var_env c;
 		let actual_r_type = deduce_expr_type type_env var_env e in
 		if not (eq_type type_env actual_r_type r_type) then 
@@ -238,7 +228,7 @@ let check_function_declarations type_env function_declarations =
 
 let typecheck (type_declarations, function_declarations, variable_declarations, command) = 
 	check_type_declarations type_declarations;
-	let type_env = TypeEnv.of_seq (List.to_seq type_declarations) in
+	let type_env = Env.of_seq (List.to_seq type_declarations) in
 	let function_env = check_function_declarations type_env function_declarations in
-	let var_env = deduce_vars_types type_env VarEnv.empty variable_declarations in
+	let var_env = deduce_vars_types type_env Env.empty variable_declarations in
 	check_command type_env function_env var_env command

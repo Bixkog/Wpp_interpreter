@@ -49,3 +49,9 @@ type function_declaration = function_name * (argument list) * typ * vars_declara
 type type_declaration = type_signature * typ
 
 type program = type_declaration list * function_declaration list * vars_declarations * command
+
+module Env = Map.Make(String);;
+module Heap = Map.Make(struct
+         type t = int 
+         let compare  = Stdlib.compare
+       end);;
