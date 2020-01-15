@@ -82,9 +82,9 @@ let rec pretty_value v = match v with
 	| VPar (v1, v2) -> "<" ^ (pretty_value v1) ^ ", " ^ (pretty_value v2) ^ ">"
 	| VUnit -> "<>"
 
-let pretty_heap heap =  List.rev (Heap.fold 
-	(fun k v l -> ((string_of_int k) ^ " = " ^ (pretty_value v)) :: l)
-	heap [])
+let pretty_heap heap =  Seq.fold_left 
+	(fun l (k, v) -> ((string_of_int k) ^ " = " ^ (pretty_value v)) :: l)
+	[] heap
 
 let pretty_env env = List.rev (Env.fold (fun k v l -> (k ^ " = " ^ (pretty_value v)) :: l) env [])
 

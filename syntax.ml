@@ -52,7 +52,8 @@ type type_declaration = type_signature * typ
 type program = type_declaration list * function_declaration list * vars_declarations * command
 
 module Env = Map.Make(String);;
-module Heap = Map.Make(struct
+module Heap = Hashtbl.Make(struct
          type t = int 
-         let compare  = Stdlib.compare
+         let equal = (=)
+         let hash = Hashtbl.hash
        end);;

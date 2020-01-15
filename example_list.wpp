@@ -1,0 +1,36 @@
+type int_list = (int *  ptr int_list) + unit
+in
+append(list : ptr int_list, value : int) : ptr int_list = vars in
+	switch *(list)
+	inl x: 
+		var head := outl x in
+		var tail := outr x in
+		tail := append(tail, value);
+		*list := inl <head, tail>
+	inr x:
+		var empty := new inr <> in
+		debug_print empty_assign;
+		*list := inl <value, empty>;
+		debug_print append_empty
+	in return list
+is_empty(list : ptr int_list) : int = vars in
+skip
+in return match *(list) with 
+	| inl x.1
+	| inr x.0
+in
+vars list := new inr <>,
+empty := 0
+in 
+var i := 10 in
+while i do
+(
+debug_print pre_loop;
+list := append (list, i);
+i := i + (-1);
+debug_print post_loop
+);
+empty := is_empty(list)
+
+
+

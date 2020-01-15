@@ -27,4 +27,4 @@ let _ =
 	print_endline "VARIABLES:";
 	List.iter (pretty_env var_env) print_endline;
 	print_endline "HEAP:";
-	List.iter (pretty_heap heap) print_endline 
+	List.iter (pretty_heap heap) print_endline

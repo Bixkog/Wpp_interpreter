@@ -95,7 +95,7 @@ let rec deduce_expr_type type_env var_env e =
 		| EInjL e -> TSum (deduce e, TUnknown)
 		| EInjR e -> TSum (TUnknown, deduce e)
 		| EMatch (e, (id_left, e_left), (id_right, e_right)) ->
-			(match deduce e with
+			(match extract (deduce e) with
 				| TSum (t1, t2) -> 
 					let left_vars = Env.add id_left t1 var_env in
 					let right_vars = Env.add id_right t2 var_env in
