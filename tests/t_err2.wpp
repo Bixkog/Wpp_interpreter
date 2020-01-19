@@ -1,0 +1,4 @@
+in
+in vars
+in 
+var x := inl{unit + int} (4) in skip

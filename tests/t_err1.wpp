@@ -1,0 +1,5 @@
+type a = b
+type b = unit
+in
+in vars
+in skip

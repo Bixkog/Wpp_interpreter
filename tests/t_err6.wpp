@@ -1,0 +1,4 @@
+in 
+f(x : int) : unit = vars in skip in return <>
+in vars x := <>
+in x := f(<>)

@@ -1,0 +1,42 @@
+type tree = (((ptr tree) * (ptr tree)) * int ) + unit
+in
+le(a : int, b : int) : unit + unit = 
+	vars loop := 1
+		 cmp := inl {unit + unit} (<>) 
+	in
+		var a_ := a in
+		(while (a + -b) * (a_ + -b) do
+			a := a + 1;
+			a_ := a_ + -1);
+		if a + -b then cmp := inr {unit + unit} (<>) 
+		else skip
+	in return cmp
+
+
+push(t : ptr tree, v : int) : ptr tree = 
+	vars
+	in
+	switch *t
+	inl node:
+		var left := outl outl node in
+		var right := outr outl node in
+		var node_v := outr node in
+		var cmp := inl {unit + unit} (<>) in
+		cmp := le(v, node_v);
+		(switch cmp
+		inl x:
+			left := push(left, v)
+		inr x:
+			right := push(right, v));
+		*t := inl{tree} (<<left, right>, node_v>)
+	inr empty:
+		var empty_l := new inr{tree} (<>) in
+		var empty_r := new inr{tree} (<>) in
+		*t := inl{tree} (<<empty_l, empty_r>, v>)
+	in return t
+in vars t := new inr{tree} (<>)
+in
+t := push(t, 5);
+t := push(t, 3);
+t := push(t, 7);
+t := push(t, 4)

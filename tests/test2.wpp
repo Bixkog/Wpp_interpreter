@@ -1,0 +1,16 @@
+in
+silnia(n : int) : int = vars s := 1 in
+	if n then 
+		s := silnia(n + -1);
+		s := s * n
+	else
+		skip
+	in return s
+in
+vars s_5 := 0
+in
+s_5 := silnia(5)
+
+
+
+

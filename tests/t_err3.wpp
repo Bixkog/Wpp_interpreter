@@ -1,0 +1,3 @@
+in
+in vars x := match (inl{unit + unit} (<>)) with | inl x.1 | inr x.<>
+in skip

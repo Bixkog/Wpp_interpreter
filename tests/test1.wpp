@@ -1,0 +1,30 @@
+type int_list = (int *  ptr int_list) + unit
+in
+empty_list() : ptr int_list = vars list := new inr{int_list} (<>) in skip in return list
+append(list : ptr int_list, value : int) : ptr int_list = vars in
+	switch *(list)
+	inl x: 
+		var head := outl x in
+		var tail := outr x in
+		tail := append(tail, value);
+		*list := inl{int_list} (<head, tail>)
+	inr x:
+		var empty := new inr{int_list} (<>) in
+		*list := inl{int_list} (<value, empty>)
+	in return list
+is_empty(list : ptr int_list) : int = vars in
+skip
+in return match *(list) with 
+	| inl x.1
+	| inr x.0
+in
+vars list := new inr{int_list} (<>)
+empty := 0
+in 
+var i := 3 in
+(
+while i do
+list := append (list, i);
+i := i + (-1)
+);
+empty := is_empty(list)
