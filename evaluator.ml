@@ -95,8 +95,11 @@ let rec eval_expr var_env e =
 
 let eval_vars vars_env vars = 
 	let evaluate vars_env var = match var with
-		| Var (id, e) -> Env.add id (eval_expr vars_env e) vars_env
+		| Var (id, e) -> let v = (eval_expr vars_env e) in 
+			add_references v;
+			Env.add id v vars_env
 		| PtrVar (id, e) -> let v = eval_expr vars_env e in
+			add_references v;
 			let alloc_ptr = alloc v in
 			Env.add id alloc_ptr vars_env
 	in

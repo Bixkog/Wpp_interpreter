@@ -50,7 +50,7 @@ let eq_type type_env t1 t2 =
 		| TPtr a' -> (match b with 
 			| TPtr b' -> aux a' b'
 			| _ -> false)
-		| trivial -> if b = trivial then true else false
+		| trivial -> b = trivial
 	in
 	aux t1 t2
 
