@@ -71,8 +71,8 @@ let rec eval_expr var_env e =
 		| EProjR e -> (match eval e with
 			| VPar (v1, v2) -> v2
 			| _ -> failwith ("Stuck at projection. " ^ (pretty_expr e) ^ " doesn't evaluate to pair."))
-		| EInjL e -> VInjL (eval e)
-		| EInjR e -> VInjR (eval e)
+		| EInjL (t, e) -> VInjL (eval e)
+		| EInjR (t, e) -> VInjR (eval e)
 		| EMatch (e, (id_left, e_left), (id_right, e_right)) -> (match eval e with
 			| VInjL v -> eval_expr (Env.add id_left v var_env) e_left
 			| VInjR v -> eval_expr (Env.add id_right v var_env) e_right
@@ -123,7 +123,7 @@ and eval_command var_env c = match c with
 		| _ -> failwith ("If condition" ^ (pretty_expr e) ^ " did not evaluate to int."))
 	| CWhile (e, c') -> (match eval_expr var_env e with
 		| VInt 0 -> var_env
-		| VInt n -> let var_env' = eval_command var_env c' in eval_command var_env' c
+		| VInt n -> eval_command var_env (CSeq (c', c))
 		| _ -> failwith ("While condition" ^ (pretty_expr e) ^ " did not evaluate to int."))
 	| CAssign (id, e) -> 
 		let new_v = eval_expr var_env e in

@@ -41,6 +41,8 @@ rule read =
     | ")" {RPAR}
     | "<" {LTPAR}
     | ">" {RTPAR}
+    | "{" {LCPAR}
+    | "}" {RCPAR}
     | "outl" {OUTL}
     | "outr" {OUTR}
     | "inl" {INL}

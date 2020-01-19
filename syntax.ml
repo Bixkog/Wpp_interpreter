@@ -8,7 +8,6 @@ type typ =
 	| TSum of typ * typ
 	| TPtr of typ
 	| TStruct of type_signature
-	| TUnknown (* used as the other type of sum in deduction*)
 
 type var = string
 type function_name = string
@@ -19,7 +18,7 @@ type expr =
 	| EInt of int
 	| EUnit | EPar of expr * expr
 	| EProjL of expr | EProjR of expr
-	| EInjL of expr | EInjR of expr
+	| EInjL of typ * expr | EInjR of typ * expr
 	| EMatch of expr * (var * expr) * (var * expr)
 	| EDeref of expr
 	| ESum of expr * expr

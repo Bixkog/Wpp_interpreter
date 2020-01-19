@@ -12,6 +12,7 @@
 %token UNIT VOID INT
 %token LPAR RPAR
 %token LTPAR RTPAR
+%token LCPAR RCPAR
 %token OUTL OUTR INL INR ABORT
 %token PTR
 %token VARS VAR TYPE
@@ -20,7 +21,7 @@
 %token EOF
 
 %nonassoc DOT ELSE COL DO IN 
-%right OUTL OUTR INL INR PTR
+%right OUTL OUTR PTR
 %left NEG
 %left STAR
 %left SUM
@@ -48,7 +49,7 @@ function_declaration:
         {(function_id, args, return_type, function_variables, c, e)}
 
 variable_declarations:
-    | VARS; vds = separated_list(COMMA, variable_declaration) {vds}
+    | VARS; vds = list(variable_declaration) {vds}
 
 variable_declaration:
     | var_id = ID; ASSIGN; e = expr {Syntax.Var(var_id, e)}
@@ -80,7 +81,8 @@ expr:
     | LTPAR; RTPAR; {Syntax.EUnit}
     | LTPAR; e1 = expr; COMMA; e2 = expr; RTPAR {Syntax.EPar (e1, e2)}
     | OUTL; e = expr {Syntax.EProjL (e)} | OUTR; e = expr {Syntax.EProjR (e)}
-    | INL; e = expr {Syntax.EInjL (e)} | INR; e = expr {Syntax.EInjR (e)}
+    | INL; LCPAR; t = typ; RCPAR; LPAR; e = expr; RPAR {Syntax.EInjL (t, e)} 
+    | INR; LCPAR; t = typ; RCPAR; LPAR; e = expr; RPAR {Syntax.EInjR (t, e)} 
     | MATCH; e = expr; WITH; BAR; INL; a_left = abstr; BAR; INR; a_right = abstr {Syntax.EMatch (e, a_left, a_right)}
     | STAR; e = expr {Syntax.EDeref (e)}
     | e1 = expr; SUM; e2 = expr {Syntax.ESum(e1, e2)}

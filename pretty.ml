@@ -10,7 +10,6 @@ let rec pretty_typ t = match t with
 	| TSum (t1, t2) -> "(" ^ (pretty_typ t1) ^ " + " ^ (pretty_typ t2) ^ ")"
 	| TPtr t -> "Ptr " ^ (pretty_typ t)
 	| TStruct s -> s
-	| TUnknown -> "_"
 
 let rec pretty_expr e = match e with
 	| EVar x -> x
@@ -19,8 +18,8 @@ let rec pretty_expr e = match e with
 	| EPar (e1, e2) -> "(" ^ (pretty_expr e1) ^ ", " ^ (pretty_expr e2) ^ ")"
 	| EProjL e -> "outl " ^ (pretty_expr e)
 	| EProjR e -> "outR " ^ (pretty_expr e)
-	| EInjL e -> "inl " ^ (pretty_expr e)
-	| EInjR e -> "inr " ^ (pretty_expr e)
+	| EInjL (t, e) -> "inl " ^ (pretty_expr e)
+	| EInjR (t, e) -> "inr " ^ (pretty_expr e)
 	| EMatch (e, (l, el), (r, er)) -> 
 		"match " ^ (pretty_expr e) ^ " inl " ^ l ^ " -> " ^ (pretty_expr el)
 								  ^ " inr " ^ r ^ " -> " ^ (pretty_expr er)

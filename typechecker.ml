@@ -40,7 +40,6 @@ let eq_type type_env t1 t2 =
 	let rec aux a b = 
 		if a = b then true else
 		let b = extract b in
-		if b = TUnknown then true else 
 		match extract a with
 		| TSum (a1, a2) -> (match b with 
 			| TSum (b1, b2) -> (aux a1 b1) && (aux a2 b2)
@@ -51,28 +50,9 @@ let eq_type type_env t1 t2 =
 		| TPtr a' -> (match b with 
 			| TPtr b' -> aux a' b'
 			| _ -> false)
-		| TUnknown -> true
 		| trivial -> if b = trivial then true else false
 	in
 	aux t1 t2
-
-(* Unifies two equal types (according to above relation). Used in match expression to deduce return type. *)
-let rec unify_types a b = 
-	if b = TUnknown then a else
-	match a with 
-	| TUnknown -> b
-	| TSum (a1, a2) -> (match b with 
-			| TSum (b1, b2) -> TSum (unify_types a1 b1, unify_types a2 b2)
-			| _ -> failwith ("Unification error: " ^ (pretty_typ b) ^ "is not a sum."))
-	| TProd (a1, a2) -> (match b with 
-			| TProd (b1, b2) -> TProd (unify_types a1 b1, unify_types a2 b2)
-			| _ -> failwith ("Unification error: " ^ (pretty_typ b) ^ "is not a prod."))
-	| TPtr a' -> (match b with 
-			| TPtr b' -> TPtr (unify_types a' b')
-			| _ -> failwith ("Unification error: " ^ (pretty_typ b) ^ "is not a pointer."))
-	| trivial -> if b = trivial then trivial else
-			failwith ("Unification error: " ^ (pretty_typ b) ^ "is not " ^ (pretty_typ a))
-
 
 (* 
 	Deduce type of expresion.
@@ -92,8 +72,18 @@ let rec deduce_expr_type type_env var_env e =
 		| EProjR e -> (match extract (deduce e) with
 			| TProd (_, t) -> t
 			| _ -> failwith ("Projection argument is not a pair: " ^ (pretty_expr e)))
-		| EInjL e -> TSum (deduce e, TUnknown)
-		| EInjR e -> TSum (TUnknown, deduce e)
+		| EInjL (t, e) -> (match extract t with	
+			| TSum (t1, t2) -> if eq_type type_env t1 (deduce e) then t
+					else failwith ("Can't inject type " ^ (pretty_typ t) ^ 
+									". Type " ^ (pretty_typ (deduce e)) ^ 
+									" is not equal to " ^ (pretty_typ t1))
+			| _ -> failwith ("Type " ^ (pretty_typ t) ^ " is not a sum."))
+		| EInjR (t, e) -> (match extract t with	
+			| TSum (t1, t2) -> if eq_type type_env t2 (deduce e) then t
+					else failwith ("Can't inject type " ^ (pretty_typ t) ^ 
+									". Type " ^ (pretty_typ (deduce e)) ^ 
+									" is not equal to " ^ (pretty_typ t2))
+			| _ -> failwith ("Type " ^ (pretty_typ t) ^ " is not a sum."))
 		| EMatch (e, (id_left, e_left), (id_right, e_right)) ->
 			(match extract (deduce e) with
 				| TSum (t1, t2) -> 
@@ -102,7 +92,7 @@ let rec deduce_expr_type type_env var_env e =
 					let t_left = deduce_expr_type type_env left_vars e_left in
 					let t_right = deduce_expr_type type_env right_vars e_right in
 					if eq_type type_env t_left t_right then
-					unify_types t_left t_right
+					t_left
 					else failwith ("Match branches types don't match " ^ 
 						(pretty_typ t_left) ^ " =/= " ^ (pretty_typ t_right))
 
